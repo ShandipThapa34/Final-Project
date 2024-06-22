@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gharsewa/owner/models/property_model.dart';
 import 'package:gharsewa/owner/services/property_services.dart';
 import 'package:gharsewa/owner/views/property_screen/add_property_screen.dart';
+import 'package:gharsewa/owner/views/property_screen/edit_property_screen.dart';
 import 'package:gharsewa/owner/views/property_screen/property_details.dart';
 import 'package:gharsewa/owner/views/widgets/appbar_widget.dart';
 import 'package:gharsewa/owner/views/widgets/text_style.dart';
@@ -27,6 +28,18 @@ class _PropertyScreenState extends State<PropertyScreen> {
     _roomsFuture = propertyService.getAllRooms();
   }
 
+  Future<void> _deleteRoom(int id) async {
+    try {
+      await propertyService.deleteRoom(id);
+      VxToast.show(context, msg: "Property removed successfully");
+      setState(() {
+        _roomsFuture = propertyService.getAllRooms(); // Refresh the list
+      });
+    } catch (e) {
+      VxToast.show(context, msg: "Failed to delete room: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +51,13 @@ class _PropertyScreenState extends State<PropertyScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const AddProperty(),
+              builder: (context) => AddProperty(
+                onPropertyAdded: () {
+                  setState(() {
+                    _roomsFuture = propertyService.getAllRooms();
+                  });
+                },
+              ),
             ),
           );
         },
@@ -71,7 +90,8 @@ class _PropertyScreenState extends State<PropertyScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => PropertyDetails(),
+                                builder: (context) =>
+                                    PropertyDetails(room: room),
                               ),
                             );
                           },
@@ -91,45 +111,48 @@ class _PropertyScreenState extends State<PropertyScreen> {
                               10.widthBox,
                             ],
                           ),
-                          trailing: VxPopupMenu(
-                            menuBuilder: () => Column(
-                              children: List.generate(
-                                popupMenuTitles.length,
-                                (i) => Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        popupMenuIcons[i],
-                                        color:
-                                            const Color.fromRGBO(73, 73, 73, 1),
-                                      ),
-                                      5.widthBox,
-                                      normalText(
-                                        text: popupMenuTitles[i],
-                                        color:
-                                            const Color.fromRGBO(73, 73, 73, 1),
-                                      )
-                                    ],
-                                  ).onTap(
-                                    () async {
-                                      switch (i) {
-                                        case 0:
-                                          // Edit room logic
-                                          break;
-                                        case 1:
-                                          VxToast.show(context,
-                                              msg: "Room removed");
-                                          // Delete room logic
-                                          break;
-                                      }
-                                    },
+                          trailing: PopupMenuButton<String>(
+                            padding: EdgeInsets.zero,
+                            onSelected: (value) {
+                              if (value == 'Edit') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditProperty(
+                                      room: room,
+                                      onPropertyUpdated: () {
+                                        setState(() {
+                                          _roomsFuture =
+                                              propertyService.getAllRooms();
+                                        });
+                                      },
+                                    ),
                                   ),
+                                );
+                              } else {
+                                _deleteRoom(room.id);
+                              }
+                            },
+                            itemBuilder: (BuildContext context) {
+                              return [
+                                const PopupMenuItem(
+                                  value: 'Edit',
+                                  child: Text('Edit'),
                                 ),
+                                const PopupMenuItem(
+                                  value: 'Delete',
+                                  child: Text('Delete'),
+                                ),
+                              ];
+                            },
+                            child: const SizedBox(
+                              width: 24.0,
+                              height: 24.0,
+                              child: Icon(
+                                Icons.more_vert,
+                                size: 24.0,
                               ),
-                            ).box.white.width(200).rounded.make(),
-                            clickType: VxClickType.singleClick,
-                            child: const Icon(Icons.more_vert_rounded),
+                            ),
                           ),
                         ),
                       );

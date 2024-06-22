@@ -10,54 +10,74 @@ import 'package:gharsewa/constant/constant.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-class AddProperty extends StatefulWidget {
-  final VoidCallback onPropertyAdded; // Callback to refresh property list
-  const AddProperty({super.key, required this.onPropertyAdded});
+class EditProperty extends StatefulWidget {
+  final OwnerRoom room;
+  final VoidCallback onPropertyUpdated; // Callback to refresh property list
+  const EditProperty(
+      {super.key, required this.room, required this.onPropertyUpdated});
 
   @override
-  State<AddProperty> createState() => _AddPropertyState();
+  State<EditProperty> createState() => _EditPropertyState();
 }
 
-class _AddPropertyState extends State<AddProperty> {
+class _EditPropertyState extends State<EditProperty> {
   // Text controllers
-  var pAddressController = TextEditingController();
-  var pDescController = TextEditingController();
-  var pPriceController = TextEditingController();
-  var pRoomController = TextEditingController();
-  var maxOccupancyController = TextEditingController();
+  late TextEditingController pAddressController;
+  late TextEditingController pDescController;
+  late TextEditingController pPriceController;
+  late TextEditingController pRoomController;
+  late TextEditingController maxOccupancyController;
   String? propertyType;
-  String? propertyFor;
 
-  // Cloudinary configuration
-  final cloudinary = CloudinaryPublic('duxgyka18', 'tgiikg5i');
-
-  List<File> selectedImages = [];
-  PropertyService propertyService = PropertyService();
-
-  bool isLoading = false;
-
-  // Amenities switches
   bool wifi = false;
   bool parking = false;
   bool airConditioning = false;
   bool pool = false;
 
-  Future<void> uploadImagesToCloudinaryAndSaveRoom() async {
+  // Cloudinary configuration
+  final cloudinary = CloudinaryPublic('duxgyka18', 'tgiikg5i');
+
+  List<File> selectedImages = [];
+  List<String> existingImageUrls = [];
+  PropertyService propertyService = PropertyService();
+
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize text controllers with existing room data
+    pAddressController = TextEditingController(text: widget.room.address);
+    pDescController = TextEditingController(text: widget.room.description);
+    pPriceController =
+        TextEditingController(text: widget.room.price.toString());
+    pRoomController = TextEditingController(text: widget.room.roomNumber);
+    maxOccupancyController =
+        TextEditingController(text: widget.room.maxOccupancy.toString());
+    propertyType = widget.room.roomType;
+
+    wifi = widget.room.amenities["Wifi"] ?? false;
+    parking = widget.room.amenities["Parking"] ?? false;
+    airConditioning = widget.room.amenities["Air Conditioning"] ?? false;
+    pool = widget.room.amenities["Pool"] ?? false;
+
+    existingImageUrls = widget.room.images;
+  }
+
+  Future<void> updateRoomDetails() async {
     setState(() {
       isLoading = true;
     });
 
     try {
-      List<String> imageUrls = [];
+      List<String> newImageUrls = [];
       for (var imageFile in selectedImages) {
         var response = await cloudinary.uploadFile(
           CloudinaryFile.fromFile(imageFile.path),
         );
-
-        // Add URL from Cloudinary to imageUrls
-        imageUrls.add(response.secureUrl);
+        newImageUrls.add(response.secureUrl);
       }
-      // Collect form data
+
       String address = pAddressController.text;
       String description = pDescController.text;
       String price = pPriceController.text;
@@ -65,7 +85,6 @@ class _AddPropertyState extends State<AddProperty> {
       String roomType = propertyType ?? '';
       String maxOccupancy = maxOccupancyController.text;
 
-      // Create RoomRequest object
       RoomRequest roomRequest = RoomRequest(
         roomNumber: roomNumber,
         roomType: roomType,
@@ -73,7 +92,7 @@ class _AddPropertyState extends State<AddProperty> {
         description: description,
         availability: true,
         maxOccupancy: maxOccupancy,
-        images: imageUrls,
+        images: newImageUrls.isNotEmpty ? newImageUrls : widget.room.images,
         amenities: {
           "Wifi": wifi,
           "Parking": parking,
@@ -83,14 +102,12 @@ class _AddPropertyState extends State<AddProperty> {
         address: address,
       );
 
-      // Call createRoom function
-      await propertyService.createRoom(roomRequest);
-      VxToast.show(context, msg: "Property added successfully");
-
-      // Notify callback that property is added
-      widget.onPropertyAdded();
+      await propertyService.updateRoom(widget.room.id, roomRequest);
+      widget.onPropertyUpdated(); // Notify parent to refresh property list
+      VxToast.show(context, msg: "Property updated successfully");
     } catch (e) {
-      print('Error uploading images: $e');
+      print('Error updating room: $e');
+      VxToast.show(context, msg: "Failed to update Property");
     } finally {
       setState(() {
         isLoading = false;
@@ -105,13 +122,13 @@ class _AddPropertyState extends State<AddProperty> {
       backgroundColor: const Color.fromARGB(255, 245, 244, 243),
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: boldText(text: "Add Property", color: Colors.white, size: 16.0),
+        title: boldText(text: "Edit Property", color: Colors.white, size: 16.0),
         actions: [
           isLoading
               ? const CircularProgressIndicator(color: Colors.white)
               : TextButton(
                   onPressed: () async {
-                    await uploadImagesToCloudinaryAndSaveRoom();
+                    await updateRoomDetails();
                   },
                   child:
                       boldText(text: "Save", size: 16.0, color: Colors.white),
@@ -128,21 +145,21 @@ class _AddPropertyState extends State<AddProperty> {
               10.heightBox,
               customTextField(
                 title: "Property Address",
-                hint: "Room for student",
+                hint: "Enter address",
                 isPass: false,
                 controller: pAddressController,
               ),
               10.heightBox,
               customTextField(
                 title: "Property Description",
-                hint: "Room for student",
+                hint: "Enter description",
                 isPass: false,
                 controller: pDescController,
               ),
               10.heightBox,
               customTextField(
                 title: "Price Per Month",
-                hint: "3000",
+                hint: "Enter price",
                 isPass: false,
                 controller: pPriceController,
                 keyboardType: TextInputType.number,
@@ -158,16 +175,15 @@ class _AddPropertyState extends State<AddProperty> {
                 iconEnabledColor: Colors.blue,
                 value: propertyType,
                 validator: (value) {
-                  if (value.isEmptyOrNull) {
+                  if (value == null || value.isEmpty) {
                     return emptyFieldErrMessage;
-                  } else {
-                    return null;
                   }
+                  return null;
                 },
                 decoration: const InputDecoration(
                     border: InputBorder.none,
                     errorStyle: TextStyle(color: Colors.blue)),
-                hint: normalText(text: "Room", color: fontGrey),
+                hint: normalText(text: "Select type", color: fontGrey),
                 isExpanded: true,
                 items: propertiesType
                     .map((propertytype) => DropdownMenuItem<String>(
@@ -189,7 +205,7 @@ class _AddPropertyState extends State<AddProperty> {
               15.heightBox,
               customTextField(
                 title: "Number of Rooms",
-                hint: "2",
+                hint: "Enter number of rooms",
                 isPass: false,
                 controller: pRoomController,
                 keyboardType: TextInputType.number,
@@ -197,7 +213,7 @@ class _AddPropertyState extends State<AddProperty> {
               10.heightBox,
               customTextField(
                 title: "Max Occupancy",
-                hint: "2",
+                hint: "Enter max occupancy",
                 isPass: false,
                 controller: maxOccupancyController,
                 keyboardType: TextInputType.number,
@@ -206,10 +222,8 @@ class _AddPropertyState extends State<AddProperty> {
               const Divider(),
               boldText(
                 text: "Amenities:",
-                color: Colors.blue,
-                size: 16.0,
+                color: const Color.fromRGBO(73, 73, 73, 1),
               ),
-              10.heightBox,
               buildAmenitySwitch("Wifi", wifi, (value) {
                 setState(() {
                   wifi = value;
@@ -230,19 +244,33 @@ class _AddPropertyState extends State<AddProperty> {
                   pool = value;
                 });
               }),
-              15.heightBox,
-              const Divider(),
-              boldText(
-                text: "Choose Property Images:",
-                color: Colors.blue,
-                size: 16.0,
-              ),
               10.heightBox,
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
                 children: [
-                  // Display selected images
+                  // Display existing images from URLs
+                  ...existingImageUrls.map(
+                    (url) => Stack(
+                      children: [
+                        Image.network(url,
+                            width: 100, height: 100, fit: BoxFit.cover),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.remove_circle),
+                            onPressed: () {
+                              setState(() {
+                                existingImageUrls.remove(url);
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Display new selected images
                   ...selectedImages.map(
                     (image) => Stack(
                       children: [
@@ -263,7 +291,6 @@ class _AddPropertyState extends State<AddProperty> {
                       ],
                     ),
                   ),
-                  // Button to add more images
                   IconButton(
                     icon: const Icon(Icons.add_a_photo),
                     onPressed: () async {
@@ -287,15 +314,11 @@ class _AddPropertyState extends State<AddProperty> {
   }
 
   Widget buildAmenitySwitch(
-      String title, bool value, ValueChanged<bool> onChanged) {
+      String title, bool value, Function(bool) onChanged) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-              fontFamily: 'sans_semibold', fontSize: 14, color: Colors.black),
-        ),
+        normalText(text: title, color: const Color.fromRGBO(73, 73, 73, 1)),
         Switch(
           value: value,
           onChanged: onChanged,

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gharsewa/owner/models/property_model.dart';
 import 'package:gharsewa/owner/views/widgets/text_style.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class PropertyDetails extends StatelessWidget {
-  const PropertyDetails({super.key});
+  final OwnerRoom room;
+
+  const PropertyDetails({super.key, required this.room});
 
   @override
   Widget build(BuildContext context) {
@@ -11,8 +14,7 @@ class PropertyDetails extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: boldText(
-            text: "Single room for student", color: Colors.white, size: 16.0),
+        title: boldText(text: room.address, color: Colors.white, size: 16.0),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -22,19 +24,16 @@ class PropertyDetails extends StatelessWidget {
             VxSwiper.builder(
               autoPlay: true,
               height: 350,
-              itemCount: 3,
+              itemCount: room.images.length,
               aspectRatio: 16 / 9,
               viewportFraction: 1.0,
               itemBuilder: (context, index) {
-                return Image.asset(
-                  "assets/images/room4.jpg",
+                return Image.network(
+                  room.images[index],
                   width: double.infinity,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                 );
               },
-            ),
-            const Divider(
-              thickness: 2.0,
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -42,27 +41,31 @@ class PropertyDetails extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   10.heightBox,
-                  boldText(
-                    text: "Single room for student",
-                    color: const Color.fromRGBO(73, 73, 73, 1),
-                    size: 18.0,
+                  Row(
+                    children: [
+                      const Icon(Icons.location_pin),
+                      5.widthBox,
+                      boldText(
+                        text: room.address,
+                        color: const Color.fromRGBO(73, 73, 73, 1),
+                        size: 22.0,
+                      ),
+                    ],
                   ),
                   normalText(
-                    text: "Pokhara, chipledunga",
+                    text: room.address,
                     color: const Color.fromRGBO(112, 112, 112, 1),
                     size: 18.0,
                   ),
-
                   const Divider(),
-
                   //rating
-                  10.heightBox,
                   Row(
                     children: [
                       boldText(text: "Rating: ", color: Colors.black),
                       VxRating(
                         isSelectable: false,
-                        value: double.parse("4.8".toString()),
+                        value: double.parse(
+                            "4.8"), // Replace with actual rating value
                         onRatingUpdate: (value) {},
                         normalColor: const Color.fromRGBO(209, 209, 209, 1),
                         selectionColor: Colors.yellow,
@@ -72,20 +75,42 @@ class PropertyDetails extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const Divider(),
 
                   //price
-                  10.heightBox,
-                  boldText(
-                    text: "Rs. 3000/month",
-                    color: Colors.red,
-                    size: 18.0,
+
+                  Row(
+                    children: [
+                      boldText(
+                        text: "Price: ",
+                        color: Colors.black,
+                      ),
+                      boldText(
+                        text: "Rs. ${room.price}/month",
+                        color: Colors.red,
+                        size: 16.0,
+                      ),
+                    ],
                   ),
 
-                  10.heightBox,
-                  const Divider(
-                    thickness: 2.0,
+                  const Divider(),
+
+                  boldText(
+                    text: "Description: ",
+                    color: const Color.fromRGBO(73, 73, 73, 1),
                   ),
-                  10.heightBox,
+
+                  Column(
+                    children: [
+                      normalText(
+                        text: room.description,
+                        color: const Color.fromRGBO(73, 73, 73, 1),
+                      ),
+                    ],
+                  ),
+
+                  const Divider(),
+
                   Column(
                     children: [
                       Row(
@@ -96,35 +121,14 @@ class PropertyDetails extends StatelessWidget {
                                 color: const Color.fromRGBO(73, 73, 73, 1)),
                           ),
                           normalText(
-                              text: "1",
+                              text: room.roomNumber.toString(),
                               color: const Color.fromRGBO(73, 73, 73, 1)),
                         ],
                       ),
                     ],
                   ),
-                  10.heightBox,
-                  const Divider(
-                    thickness: 2.0,
-                  ),
-                  //description section
-                  10.heightBox,
-                  boldText(
-                    text: "Description: ",
-                    color: const Color.fromRGBO(73, 73, 73, 1),
-                  ),
-                  10.heightBox,
-                  Column(
-                    children: [
-                      normalText(
-                        text: "Best for single person only",
-                        color: const Color.fromRGBO(73, 73, 73, 1),
-                      ),
-                    ],
-                  ),
-                  10.heightBox,
-                  const Divider(
-                    thickness: 2.0,
-                  ),
+
+                  const Divider(),
                   Column(
                     children: [
                       Row(
@@ -135,32 +139,55 @@ class PropertyDetails extends StatelessWidget {
                                 color: const Color.fromRGBO(73, 73, 73, 1)),
                           ),
                           normalText(
-                              text: "Room",
+                              text: room.roomType,
                               color: const Color.fromRGBO(73, 73, 73, 1)),
                         ],
                       ),
                     ],
                   ),
-                  10.heightBox,
-                  const Divider(
-                    thickness: 2.0,
-                  ),
+
+                  const Divider(),
                   Column(
                     children: [
                       Row(
                         children: [
                           SizedBox(
                             child: boldText(
-                                text: "Property for: ",
+                                text: "Availability: ",
                                 color: const Color.fromRGBO(73, 73, 73, 1)),
                           ),
                           normalText(
-                              text: "Student",
+                              text: room.availability
+                                  ? "Available"
+                                  : "Not Available",
                               color: const Color.fromRGBO(73, 73, 73, 1)),
                         ],
                       ),
                     ],
                   ),
+
+                  const Divider(),
+                  //amenities section
+                  boldText(text: "Amenities: ", color: Colors.black),
+                  10.heightBox,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: room.amenities.entries.map((entry) {
+                      return Row(
+                        children: [
+                          normalText(
+                            text: entry.key,
+                            color: const Color.fromRGBO(73, 73, 73, 1),
+                          ),
+                          5.widthBox,
+                          Icon(
+                            entry.value ? Icons.check : Icons.close,
+                            color: entry.value ? Colors.green : Colors.red,
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  )
                 ],
               ).box.white.padding(const EdgeInsets.all(8)).shadowSm.make(),
             ),

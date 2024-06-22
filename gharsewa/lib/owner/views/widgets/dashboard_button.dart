@@ -16,13 +16,13 @@ Widget dashboardButton(context, {title, count, icon}) {
           ],
         ),
       ),
-      Image.asset(icon, width: 40, color: Colors.white),
+      Image.asset(icon, width: 30, color: Colors.white),
     ],
   )
       .box
       .color(Colors.blue)
       .rounded
-      .size(size.width * 0.4, 80)
+      .size(size.width * 0.45, 80)
       .padding(const EdgeInsets.all(8))
       .make();
 }

@@ -1,6 +1,3 @@
-// room_request.dart
-import 'dart:ffi';
-
 class RoomRequest {
   final String roomNumber;
   final String roomType;
@@ -41,10 +38,10 @@ class OwnerRoom {
   final int id;
   final String roomNumber;
   final String roomType;
-  final Double price;
+  final String price;
   final String description;
   final bool availability;
-  final int maxOccupancy;
+  final String maxOccupancy;
   final List<String> images;
   final Map<String, bool> amenities;
   final String address;
