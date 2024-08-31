@@ -161,10 +161,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   onPressed: () {
                     authService.logout();
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginUserScreen()));
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginUserScreen()),
+                      (Route<dynamic> route) => false,
+                    );
                   },
                   child: "Log Out"
                       .text

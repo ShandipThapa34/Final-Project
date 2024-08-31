@@ -1,18 +1,16 @@
-class Room {
+class UserRoom {
   final int id;
   final String roomNumber;
   final String roomType;
-  final double price;
+  final String price;
   final String description;
   final bool availability;
-  final int maxOccupancy;
+  final String maxOccupancy;
   final List<String> images;
-  final List<String> amenities;
-  final String createdDate;
-  final String updatedDate;
+  final Map<String, bool> amenities;
   final String address;
 
-  Room({
+  UserRoom({
     required this.id,
     required this.roomNumber,
     required this.roomType,
@@ -22,24 +20,20 @@ class Room {
     required this.maxOccupancy,
     required this.images,
     required this.amenities,
-    required this.createdDate,
-    required this.updatedDate,
     required this.address,
   });
 
-  factory Room.fromJson(Map<String, dynamic> json) {
-    return Room(
+  factory UserRoom.fromJson(Map<String, dynamic> json) {
+    return UserRoom(
       id: json['id'],
-      roomNumber: json['room_number'],
-      roomType: json['room_type'],
-      price: json['price'].toDouble(),
+      roomNumber: json['roomNumber'],
+      roomType: json['roomType'],
+      price: json['price'],
       description: json['description'],
       availability: json['availability'],
-      maxOccupancy: json['max_occupancy'],
+      maxOccupancy: json['maxOccupancy'],
       images: List<String>.from(json['images']),
-      amenities: List<String>.from(json['amenities']),
-      createdDate: json['created_date'],
-      updatedDate: json['updated_date'],
+      amenities: Map<String, bool>.from(json['amenities']),
       address: json['address'],
     );
   }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:gharsewa/constant/constant.dart';
-import 'package:gharsewa/user/models/user_room_model.dart';
+import 'package:gharsewa/owner/models/property_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,9 +10,8 @@ class RoomService {
     return prefs.getString('jwtToken');
   }
 
-  Future<List<UserRoom>> getAllRooms() async {
+  Future<List<OwnerRoom>> getAllRooms() async {
     final token = await getToken();
-
     if (token == null) {
       print('no token found');
     }
@@ -30,7 +29,7 @@ class RoomService {
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
-      return data.map((room) => UserRoom.fromJson(room)).toList();
+      return data.map((room) => OwnerRoom.fromJson(room)).toList();
     } else {
       throw Exception('Failed to load rooms');
     }

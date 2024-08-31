@@ -26,6 +26,11 @@ class AuthService {
     await prefs.setString('jwtToken', token);
   }
 
+  Future<void> storeUserId(int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('userId', userId);
+  }
+
   Future<OwnerLoginRequestResponse> login(
       OwnerLoginRequest loginRequest) async {
     final url = Uri.parse('$authURL/login');
@@ -37,15 +42,20 @@ class AuthService {
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
+      print("This is reesponse body: $responseData");
       final String token = responseData['accessToken'];
+      final int userId =
+          responseData['id']; // Assuming 'id' is the key for userId
 
-      //store token
+      // Store token and userId
       await storeToken(token);
+      await storeUserId(userId);
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isOwnerLoggedIn', true);
       await prefs.setString('accessToken', responseData['accessToken']);
       await prefs.setString('refreshToken', responseData['refreshToken']);
+
       return OwnerLoginRequestResponse.fromJson(responseData);
     } else {
       return OwnerLoginRequestResponse(
@@ -60,10 +70,16 @@ class AuthService {
     await prefs.setBool('isOwnerLoggedIn', false);
     await prefs.remove('accessToken');
     await prefs.remove('refreshToken');
+    await prefs.remove('userId'); // Remove userId on logout
   }
 
   Future<String?> getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
+  }
+
+  Future<int?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('userId');
   }
 }

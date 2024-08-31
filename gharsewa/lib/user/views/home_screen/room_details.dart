@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gharsewa/user/models/room_model.dart';
+import 'package:gharsewa/owner/views/widgets/text_style.dart';
+import 'package:gharsewa/user/models/user_room_model.dart';
 import 'package:gharsewa/user/views/common_widgets/our_button.dart';
 import 'package:gharsewa/user/views/message_screen/chat_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class RoomDetails extends StatefulWidget {
-  final Room room;
+  final UserRoom room;
 
   const RoomDetails({super.key, required this.room});
 
@@ -70,30 +71,37 @@ class _RoomDetailsState extends State<RoomDetails> {
                     ),
                     // Title and details section
                     10.heightBox,
-                    widget.room.address.text
-                        .overflow(TextOverflow.ellipsis)
-                        .size(20)
-                        .color(Colors.black)
-                        .fontFamily("sans_bold")
-                        .make(),
+                    Row(
+                      children: [
+                        Icon(Icons.location_pin),
+                        10.widthBox,
+                        widget.room.address.text
+                            .overflow(TextOverflow.ellipsis)
+                            .size(20)
+                            .color(Colors.black)
+                            .fontFamily("sans_bold")
+                            .make(),
+                      ],
+                    ),
 
                     // Rating
                     10.heightBox,
-                    // Row(
-                    //   children: [
-                    //     VxRating(
-                    //       isSelectable: false,
-                    //       value: widget.listing.rating,
-                    //       onRatingUpdate: (value) {},
-                    //       normalColor: const Color.fromRGBO(209, 209, 209, 1),
-                    //       selectionColor: const Color.fromARGB(255, 226, 205, 19),
-                    //       count: 5,
-                    //       maxRating: 5,
-                    //       size: 25,
-                    //     ),
-                    //     "${widget.listing.rating}".text.make(),
-                    //   ],
-                    // ),
+                    Row(
+                      children: [
+                        VxRating(
+                          isSelectable: false,
+                          value: 4.0,
+                          onRatingUpdate: (value) {},
+                          normalColor: const Color.fromRGBO(209, 209, 209, 1),
+                          selectionColor:
+                              const Color.fromARGB(255, 226, 205, 19),
+                          count: 5,
+                          maxRating: 5,
+                          size: 25,
+                        ),
+                        "(4.0/5.0)".text.make(),
+                      ],
+                    ),
 
                     // Price
                     10.heightBox,
@@ -105,58 +113,62 @@ class _RoomDetailsState extends State<RoomDetails> {
                         .make(),
 
                     10.heightBox,
-                    // Row(
-                    //   children: [
-                    //     Expanded(
-                    //       child: Column(
-                    //         mainAxisAlignment: MainAxisAlignment.center,
-                    //         crossAxisAlignment: CrossAxisAlignment.start,
-                    //         children: [
-                    //           "Owner"
-                    //               .text
-                    //               .size(16)
-                    //               .color(Colors.blue)
-                    //               .fontFamily("sans_semibold")
-                    //               .make(),
-                    //           5.heightBox,
-                    //           widget.listing.owner
-                    //               .text
-                    //               .fontFamily("sans_semibold")
-                    //               .color(Colors.black)
-                    //               .size(18)
-                    //               .make(),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     const CircleAvatar(
-                    //       backgroundColor: Colors.blue,
-                    //       child: Icon(
-                    //         Icons.message,
-                    //         color: Colors.white,
-                    //       ),
-                    //     ).onTap(
-                    //       () {
-                    //         Get.to(
-                    //           () => const ChatScreen(),
-                    //         );
-                    //       },
-                    //     ),
-                    //   ],
-                    // )
-                    //     .box
-                    //     .height(60)
-                    //     .padding(const EdgeInsets.symmetric(horizontal: 16))
-                    //     .color(const Color.fromARGB(239, 255, 255, 255))
-                    //     .roundedSM
-                    //     .outerShadowSm
-                    //     .make(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              "Owner"
+                                  .text
+                                  .size(16)
+                                  .color(Colors.blue)
+                                  .fontFamily("sans_semibold")
+                                  .make(),
+                              5.heightBox,
+                              "Hex"
+                                  .text
+                                  .fontFamily("sans_semibold")
+                                  .color(Colors.black)
+                                  .size(18)
+                                  .make(),
+                            ],
+                          ),
+                        ),
+                        const CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          child: Icon(
+                            Icons.message,
+                            color: Colors.white,
+                          ),
+                        ).onTap(
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ChatScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    )
+                        .box
+                        .height(60)
+                        .padding(const EdgeInsets.symmetric(horizontal: 16))
+                        .color(const Color.fromARGB(239, 255, 255, 255))
+                        .roundedSM
+                        .outerShadowSm
+                        .make(),
 
                     // Description section
                     10.heightBox,
-                    "Description"
+                    "Description:"
                         .text
                         .fontFamily("sans_semibold")
                         .color(Colors.black)
+                        .size(16.0)
                         .make(),
                     5.heightBox,
                     widget.room.description.text
@@ -169,9 +181,70 @@ class _RoomDetailsState extends State<RoomDetails> {
                         .make(),
 
                     10.heightBox,
+                    "Room Type: ${widget.room.roomType}"
+                        .text
+                        .fontFamily("sans_semibold")
+                        .color(Colors.black)
+                        .size(16.0)
+                        .make(),
+                    10.heightBox,
+
+                    "Number of Rooms: ${widget.room.roomNumber}"
+                        .text
+                        .fontFamily("sans_semibold")
+                        .color(Colors.black)
+                        .size(16.0)
+                        .make(),
+                    10.heightBox,
+
+                    boldText(
+                        text: "Amenities: ", color: Colors.black, size: 16.0),
+                    10.heightBox,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: widget.room.amenities.entries.map((entry) {
+                        return Row(
+                          children: [
+                            normalText(
+                              text: entry.key,
+                              color: const Color.fromRGBO(73, 73, 73, 1),
+                            ),
+                            5.widthBox,
+                            Icon(
+                              entry.value ? Icons.check : Icons.close,
+                              color: entry.value ? Colors.green : Colors.red,
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+
+                    10.heightBox,
+
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            SizedBox(
+                              child: boldText(
+                                  size: 16.0,
+                                  text: "Availability: ",
+                                  color: const Color.fromRGBO(73, 73, 73, 1)),
+                            ),
+                            normalText(
+                                text: widget.room.availability
+                                    ? "Available"
+                                    : "Not Available",
+                                color: const Color.fromRGBO(73, 73, 73, 1)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    10.heightBox,
 
                     "Location on Map"
                         .text
+                        .size(16.0)
                         .fontFamily("sans_semibold")
                         .color(Colors.black)
                         .make(),

@@ -10,11 +10,6 @@ class PropertyService {
     return prefs.getString('jwtToken');
   }
 
-  Future<int?> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('userId');
-  }
-
   Future<void> createRoom(RoomRequest roomRequest) async {
     final token = await getToken();
     if (token == null) {
@@ -44,13 +39,9 @@ class PropertyService {
 
   Future<List<OwnerRoom>> getAllRooms() async {
     final token = await getToken();
-    final userId = await getUserId();
     if (token == null) {
       print('no token found');
     }
-
-    print("The token is : $token");
-    print("The user id is : $userId");
 
     final url = Uri.parse('$roomURL/rooms');
     final headers = {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gharsewa/owner/services/owner_service.dart';
 import 'package:gharsewa/owner/views/widgets/text_style.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -14,6 +15,61 @@ class _EditOwnerProfileScreenState extends State<EditOwnerProfileScreen> {
   var emailController = TextEditingController();
   var addressController = TextEditingController();
   var phoneController = TextEditingController();
+  OwnerService ownerService = OwnerService();
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserDetails();
+  }
+
+  Future<void> fetchUserDetails() async {
+    try {
+      final userDetails = await ownerService.getUserDetails();
+      setState(() {
+        nameController.text = userDetails['userName'] ?? '';
+        emailController.text = userDetails['email'] ?? '';
+        addressController.text = userDetails['address'] ?? '';
+        phoneController.text = userDetails['phoneNumber'] ?? '';
+      });
+    } catch (e) {
+      print('Error fetching user details: $e');
+      // Handle error gracefully
+    }
+  }
+
+  Future<void> saveUserDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final userId = await ownerService.getUserId();
+      if (userId == null) {
+        throw Exception('User ID not found');
+      }
+
+      final updatedData = {
+        'userName': nameController.text,
+        'email': emailController.text,
+        'address': addressController.text,
+        'phoneNumber': phoneController.text,
+      };
+
+      await ownerService.updateUserDetails(userId, updatedData);
+      VxToast.show(context, msg: "User details updated successfully");
+
+      Navigator.pop(context); // Pop the screen upon successful update
+    } catch (e) {
+      print('Error updating user details: $e');
+      // Handle error gracefully
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +87,15 @@ class _EditOwnerProfileScreenState extends State<EditOwnerProfileScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () async {},
-            child: normalText(
-              text: "Save",
-              color: Colors.white,
-            ),
+            onPressed: isLoading ? null : saveUserDetails,
+            child: isLoading
+                ? const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                : normalText(
+                    text: "Save",
+                    color: Colors.white,
+                  ),
           ),
         ],
       ),

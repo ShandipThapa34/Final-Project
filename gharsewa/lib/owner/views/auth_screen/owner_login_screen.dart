@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:gharsewa/constant/constant.dart';
 import 'package:gharsewa/owner/models/login_model.dart';
 import 'package:gharsewa/owner/services/owner_auth_service.dart';
-import 'package:gharsewa/owner/views/auth_screen/signup_screen.dart';
+import 'package:gharsewa/owner/views/auth_screen/owner_signup_screen.dart';
 import 'package:gharsewa/owner/views/home_screen/owner_home.dart';
 import 'package:gharsewa/user/views/common_widgets/custom_textfield.dart';
 import 'package:gharsewa/user/views/common_widgets/our_button.dart';
 import 'package:velocity_x/velocity_x.dart';
+
 
 class LoginOwnerScreen extends StatefulWidget {
   const LoginOwnerScreen({super.key});
@@ -82,8 +84,12 @@ class _LoginOwnerScreenState extends State<LoginOwnerScreen> {
                             try {
                               final response =
                                   await authService.login(loginRequest);
+
                               if (response.statusCode == 200) {
+                                
+
                                 VxToast.show(context, msg: response.message);
+
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(

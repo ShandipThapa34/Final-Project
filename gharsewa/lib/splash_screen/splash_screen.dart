@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gharsewa/owner/views/home_screen/home.dart';
+import 'package:gharsewa/owner/views/home_screen/owner_home.dart';
 import 'package:gharsewa/user/views/home_screen/home.dart';
 import 'package:gharsewa/user_selection/user_selection_screen.dart';
 import 'package:velocity_x/velocity_x.dart';

@@ -1,12 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:gharsewa/owner/services/owner_auth_service.dart';
+import 'package:gharsewa/owner/services/owner_service.dart';
+import 'package:gharsewa/owner/views/auth_screen/owner_login_screen.dart';
 import 'package:gharsewa/owner/views/message_screen/owner_message_screen.dart';
 import 'package:gharsewa/owner/views/setting_screen/change_password_screen.dart';
 import 'package:gharsewa/owner/views/setting_screen/edit_owner_profile.dart';
 import 'package:gharsewa/owner/views/widgets/text_style.dart';
 import 'package:velocity_x/velocity_x.dart';
 
-class SettingScreen extends StatelessWidget {
+class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
+
+  @override
+  State<SettingScreen> createState() => _SettingScreenState();
+}
+
+class _SettingScreenState extends State<SettingScreen> {
+  AuthService authService = AuthService();
+  OwnerService ownerService = OwnerService();
+  String userName = '';
+  String userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserDetails();
+  }
+
+  Future<void> fetchUserDetails() async {
+    try {
+      final userDetails = await ownerService.getUserDetails();
+      setState(() {
+        userName = userDetails['userName'] ?? 'No name available';
+        userEmail = userDetails['email'] ?? 'No email available';
+      });
+      print("The user details : $userDetails");
+      print("The name is: ${userDetails['role']}");
+      print("The phone number is: ${userDetails['phoneNumber']}");
+    } catch (e) {
+      print('Error fetching user details: $e');
+      // Handle error gracefully
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +78,11 @@ class SettingScreen extends StatelessWidget {
               fit: BoxFit.fitHeight,
             ).box.roundedFull.clip(Clip.antiAlias).make(),
             title: boldText(
-              text: "Shyam Gurung",
+              text: userName,
               color: const Color.fromRGBO(73, 73, 73, 1),
             ),
             subtitle: normalText(
-              text: "shyamgurung@gmail.com",
+              text: userEmail,
               color: const Color.fromRGBO(73, 73, 73, 1),
             ),
           ),
@@ -107,7 +142,15 @@ class SettingScreen extends StatelessWidget {
             style: const ButtonStyle(
               backgroundColor: MaterialStatePropertyAll(Colors.blue),
             ),
-            onPressed: () {},
+            onPressed: () {
+              authService.logout();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const LoginOwnerScreen()),
+                (Route<dynamic> route) => false,
+              );
+            },
             child: const Text(
               "Log Out",
               style: TextStyle(color: Colors.white, fontSize: 16),
